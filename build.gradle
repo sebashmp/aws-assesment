@@ -29,45 +29,57 @@ ext {
 }
 
 dependencies {
-    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
-    implementation "org.springframework.boot:spring-boot-starter-validation:${springBootVersion}"
+    // --- Lógica y Web ---
     implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
-    implementation "org.springframework.boot:spring-boot-starter-security:${springBootVersion}"
-    developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
-    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-validation:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
 
+    // --- Bases de Datos ---
+    // H2: Base de datos en memoria (Vital para HU1 y Tests)
+    runtimeOnly 'com.h2database:h2'
+
+    // MySQL: Driver real (Lo usaremos en la HU2 con RDS).
+    // Lo dejo listo pero no afecta si usas H2 en local.
+    runtimeOnly "mysql:mysql-connector-java:${mySqlConnectorVersion}"
+
+    // --- Utilidades y Mapeo (Hexagonal) ---
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
+
+    // Procesadores de anotaciones (Orden importante: Lombok -> Binding -> Mapstruct)
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok-mapstruct-binding:${lombokMapstructBindingVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
+    // --- Documentación ---
     implementation "org.springdoc:springdoc-openapi-ui:${openApiVersion}"
-    implementation 'io.github.cdimascio:dotenv-java:2.2.4'
 
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    // --- Testing ---
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
 }
 
 tasks.named('test') {
     useJUnitPlatform()
-
 }
 
 jacocoTestReport {
     dependsOn test
-
     reports {
         xml.required = true
         csv.required = false
         html.required = true
     }
-
+    // Exclusión profesional de archivos que no requieren pruebas unitarias
     classDirectories.setFrom(
             files(classDirectories.files.collect { dir ->
                 fileTree(dir: dir, exclude: [
-
+                        '**/PowerUpApplication*',   // Clase principal
+                        '**/model/**',              // Modelos/Entidades (Getters/Setters)
+                        '**/dto/**',                // DTOs
+                        '**/mapper/**',             // Mappers (Generados)
+                        '**/configuration/**',      // Configs
+                        '**/exception/**'           // Excepciones
                 ])
             })
     )

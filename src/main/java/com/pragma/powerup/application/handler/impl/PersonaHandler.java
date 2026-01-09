@@ -7,7 +7,9 @@ import com.pragma.powerup.application.mapper.IPersonaRequestMapper;
 import com.pragma.powerup.domain.api.IPersonaServicePort;
 import com.pragma.powerup.domain.model.PersonaModel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
 @RequiredArgsConstructor
 public class PersonaHandler implements IPersonaHandler {
     private final IPersonaServicePort personaServicePort;
