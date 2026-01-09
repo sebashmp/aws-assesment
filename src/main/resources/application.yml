@@ -1,10 +1,25 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
 spring:
+  application:
+    name: powerup-service
   datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+    # URL JDBC apuntando a tu RDS.
+    # El parametro useSSL=false es util para desarrollo, en prod se gestiona distinto.
+    # allowPublicKeyRetrieval=true es necesario a veces en drivers nuevos de MySQL 8.
+    url: jdbc:mysql://${DB_HOST_RDS}:${DB_PORT_RDS:3306}/powerup_persona?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     hibernate:
+      # 'update' creará las tablas automáticamente basado en tus entidades
       ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
